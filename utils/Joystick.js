@@ -99,7 +99,6 @@ export class Joystick {
 
     handleMousePress(mousePos) {
         // if (this.gameObj.hasPoint(vec2(mousePos.x < width()/2, mousePos.y))) 
-
         if (mousePos.x < width()/2) {
             return true
         } else {

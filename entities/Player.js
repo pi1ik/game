@@ -83,81 +83,100 @@ export class Player {
   }
 
   setPlayerControls() {
-
     const joystick = new Joystick(100, 30, 150, 600)
     let isJoystickUsing = false
-
-    onMouseDown(() => {
+    
+    onTouchStart(() => {
+      isJoystickUsing = joystick.handleMousePress(mousePos())
+      const direction = isJoystickUsing ? joystick.handleMouseDown(mousePos()) : null
+      
       if (isJoystickUsing) {
-        const direction = joystick.handleMouseDown(mousePos())
         if (direction === 'forward') {
           if (this.gameObj.paused) return
           if (this.gameObj.curAnim() !== "run") this.gameObj.play("run")
           this.gameObj.flipX = false
           if (!this.isRespawning) {
-            this.gameObj.move(this.speed, 0)
+            if (this.isMoving === true) {
+              this.gameObj.applyImpulse(vec2(-this.gameObj.vel.x, 0))
+            }
+            this.gameObj.applyImpulse(vec2(this.speed, 0))
           }
           this.isMoving = true
         } else if (direction === 'backward') {
           if (this.gameObj.paused) return
           if (this.gameObj.curAnim() !== "run") this.gameObj.play("run")
           this.gameObj.flipX = true
-          if (!this.isRespawning) this.gameObj.move(-this.speed, 0)
+          if (!this.isRespawning) {
+            if (this.isMoving === true) {
+              this.gameObj.applyImpulse(vec2(-this.gameObj.vel.x, 0))
+            }
+            this.gameObj.applyImpulse(vec2(-this.speed, 0))
+          }
           this.isMoving = true
         }
-        
       }
-          
+      
     })
 
-    onMousePress(() => {
+    onTouchMove(() => {
       isJoystickUsing = joystick.handleMousePress(mousePos())
-    })
-    onMouseRelease(() => {
+      const direction = isJoystickUsing ? joystick.handleMouseDown(mousePos()) : null
       if (isJoystickUsing) {
-        joystick.handleMouseRelease()
+        if (direction === 'forward') {
+          if (this.gameObj.paused) return
+          if (this.gameObj.curAnim() !== "run") this.gameObj.play("run")
+          this.gameObj.flipX = false
+          if (!this.isRespawning) {
+            if (this.isMoving === true) {
+              this.gameObj.applyImpulse(vec2(-this.gameObj.vel.x, 0))
+            }
+            this.gameObj.applyImpulse(vec2(this.speed, 0))
+          }
+          this.isMoving = true
+        } else if (direction === 'backward') {
+          if (this.gameObj.paused) return
+          if (this.gameObj.curAnim() !== "run") this.gameObj.play("run")
+          this.gameObj.flipX = true
+          if (!this.isRespawning) {
+            if (this.isMoving === true) {
+              this.gameObj.applyImpulse(vec2(-this.gameObj.vel.x, 0))
+            }
+            this.gameObj.applyImpulse(vec2(-this.speed, 0))
+          }
+          this.isMoving = true
+        }
+      }
+    })
+
+    onTouchEnd(() => {
+      joystick.handleMouseRelease()
+
+      if (!this.hasJumpedOnce) {
         if (this.gameObj.paused) return
+        if (this.isMoving === true) {
+          this.gameObj.applyImpulse(vec2(-this.gameObj.vel.x, 0))
+        }
         this.gameObj.play("idle")
         this.isMoving = false
       }
+      this.hasJumpedOnce = false
     })
 
     const lBtn = addButton(100, 100, "J", 1150, 600)
     lBtn.onClick(() => {
       if (this.gameObj.paused) return
       if (!this.isRespawning) {
-        this.gameObj.jump(this.jumpForce)
-        play("jump")
-      }
+        if (this.isMoving === true) {
+          const currentVel = this.gameObj.vel.x
+          this.gameObj.jump(this.jumpForce)
+          this.gameObj.applyImpulse(vec2(currentVel, 0))
+          
+          this.hasJumpedOnce = true
+        } else {
+          this.gameObj.jump(this.jumpForce)
+        }
+        play("jump")}
     })
-
-    lBtn.onClick(()=>{console.log(123)})
-
-    // lBtn.onHoverEnd(() => {
-    //   this.gameObj.play("idle")
-    //   this.isMoving = false
-    // })
-    // const rBtn = addButton(100, 100, "R", 250, 600)
-    // rBtn.onMouseMove((p) => {
-    //   console.log(rBtn.isHovering());
-    //   console.log('right')
-    //   if (this.gameObj.paused) return
-    //   if (this.gameObj.curAnim() !== "run") this.gameObj.play("run")
-    //   this.gameObj.flipX = false
-    //   if (!this.isRespawning) this.gameObj.move(this.speed, 0)
-    //   this.isMoving = true
-    // })
-    // rBtn.onHoverEnd(() => {
-    //   this.gameObj.play("idle")
-    //   this.isMoving = false
-    //   console.log('onHoverEnd')
-    // })
-    // rBtn.onTouchEnd(() => {
-    //   console.log(rBtn)
-    //   rBtn.update()
-    //   this.gameObj.play("idle")
-    //   this.isMoving = false
-    // })
 
     onKeyDown("a", () => {
       if (this.gameObj.paused) return
@@ -176,12 +195,22 @@ export class Player {
     })
 
     onKeyDown("space", () => {
+      // if (this.gameObj.paused) return
+      // if (
+      //   // this.gameObj.isGrounded() && 
+      //   !this.isRespawning) {
+      //   // this.hasJumpedOnce = true
+      //   this.gameObj.jump(this.jumpForce)
+      //   play("jump")
+      // }
+
       if (this.gameObj.paused) return
-      if (
-        // this.gameObj.isGrounded() && 
-        !this.isRespawning) {
-        // this.hasJumpedOnce = true
-        this.gameObj.jump(this.jumpForce)
+      if (!this.isRespawning) {
+        if (this.isMoving === true) {
+          const currentVel = this.gameObj.vel.x
+          this.gameObj.jump(this.jumpForce)
+          this.gameObj.applyImpulse(vec2(currentVel, 0))
+        }
         play("jump")
       }
 
@@ -238,6 +267,11 @@ export class Player {
   
   update() {
     onUpdate(() => {
+      if (this.gameObj.isGrounded() && this.isMoving && this.gameObj.curAnim() !== "run") {
+        this.gameObj.play("run")
+        this.gameObj.flipX = this.gameObj.vel.x < 0
+      }
+
       if (this.gameObj.isGrounded()) {
         this.hasJumpedOnce = false
         this.timeSinceLastGrounded = time()
