@@ -106,9 +106,16 @@ export class Joystick {
         }
     }
 
-    handleMouseRelease() {
-        this.gameObj.get("joystick-handle")[0].pos.x = 0
-        this.gameObj.get("joystick-handle")[0].pos.y = 0
+    handleMouseRelease(posX = 0, posY = 0) {
+        this.gameObj.get("joystick-handle")[0].pos.x = posX
+        this.gameObj.get("joystick-handle")[0].pos.y = posY
+    }
+
+    getJoystickPos() {
+        return {
+            x: this.gameObj.get("joystick-handle")[0].pos.x, 
+            y: this.gameObj.get("joystick-handle")[0].pos.y
+        }
     }
 
     onClick(e) {

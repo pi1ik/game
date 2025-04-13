@@ -149,17 +149,20 @@ export class Player {
     })
 
     onTouchEnd(() => {
-      joystick.handleMouseRelease()
-
+      console.log('touch end')
       if (!this.hasJumpedOnce) {
+        console.log('touch end joystick is using')
         if (this.gameObj.paused) return
         if (this.isMoving === true) {
           this.gameObj.applyImpulse(vec2(-this.gameObj.vel.x, 0))
         }
         this.gameObj.play("idle")
         this.isMoving = false
-      }
-      this.hasJumpedOnce = false
+        joystick.handleMouseRelease()
+      } else {
+        joystick.handleMouseRelease(joystick.getJoystickPos().x, joystick.getJoystickPos().y)
+        this.hasJumpedOnce = false
+      }    
     })
 
     const lBtn = addButton(100, 100, "J", 1150, 600)
@@ -167,15 +170,30 @@ export class Player {
       if (this.gameObj.paused) return
       if (!this.isRespawning) {
         if (this.isMoving === true) {
+          console.log('moving')
           const currentVel = this.gameObj.vel.x
+          console.log(currentVel)
           this.gameObj.jump(this.jumpForce)
           this.gameObj.applyImpulse(vec2(currentVel, 0))
+          console.log(this.gameObj.vel)
           
           this.hasJumpedOnce = true
         } else {
           this.gameObj.jump(this.jumpForce)
         }
         play("jump")}
+    })
+    onKeyDown("z", () => {
+      if (this.gameObj.paused) return
+      if (this.gameObj.curAnim() !== "run") this.gameObj.play("run")
+      this.gameObj.flipX = false
+      if (!this.isRespawning) {
+        if (this.isMoving === true) {
+          this.gameObj.applyImpulse(vec2(-this.gameObj.vel.x, 0))
+        }
+        this.gameObj.applyImpulse(vec2(this.speed, 0))
+      }
+      this.isMoving = true
     })
 
     onKeyDown("a", () => {
@@ -208,11 +226,16 @@ export class Player {
       if (!this.isRespawning) {
         if (this.isMoving === true) {
           const currentVel = this.gameObj.vel.x
+          console.log(currentVel)
           this.gameObj.jump(this.jumpForce)
           this.gameObj.applyImpulse(vec2(currentVel, 0))
+          console.log(this.gameObj.vel.x)
+          this.hasJumpedOnce = true
+        } else {
+          this.gameObj.jump(this.jumpForce)
         }
-        play("jump")
-      }
+        play("jump")}
+
 
       //coyote time
       if (
